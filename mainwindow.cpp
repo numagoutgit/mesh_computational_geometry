@@ -12,3 +12,8 @@ MainWindow::~MainWindow()
 {
     delete ui;
 }
+
+void MainWindow::changeDisplay() {
+    ui->widget->wireFrame = not ui->widget->wireFrame;
+    ui->widget->paintGL();
+};

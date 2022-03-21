@@ -19,6 +19,8 @@ public:
     void paintGL(); // Display the scene Gl
     void resizeGL(int width, int height);
 
+    bool wireFrame;
+
 protected:
     // Mouse Management
     void mousePressEvent(QMouseEvent *event);
@@ -34,6 +36,7 @@ private:
     QPoint _lastPosMouse; // To keep the last position of the mouse
 
     GeometricWorld _geomWorld; // The scene to be displayed
+    Mesh _mesh;
 };
 
 #endif // GLDISPLAYWIDGET_H

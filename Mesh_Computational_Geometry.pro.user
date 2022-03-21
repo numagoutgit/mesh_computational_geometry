@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.14.1, 2022-02-15T18:12:02. -->
+<!-- Written by QtCreator 4.14.1, 2022-03-21T21:16:54. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -290,8 +290,9 @@
     <valuelist type="QVariantList" key="CustomOutputParsers"/>
     <value type="int" key="PE.EnvironmentAspect.Base">2</value>
     <valuelist type="QVariantList" key="PE.EnvironmentAspect.Changes"/>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:/home/numag/Documents/MSOs/Calcul_et_modelisation_MOS3.6/GAM2022_Seance1/Mesh_Computational_Geometry/Mesh_Computational_Geometry.pro</value>
-    <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">/home/numag/Documents/MSOs/Calcul_et_modelisation_MOS3.6/GAM2022_Seance1/Mesh_Computational_Geometry/Mesh_Computational_Geometry.pro</value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Mesh_Computational_Geometry2</value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:/home/numag/Documents/MSOs/Calcul_et_modelisation_MOS3.6/GAM2022_Seance1/mesh_computational_geometry/Mesh_Computational_Geometry.pro</value>
+    <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">/home/numag/Documents/MSOs/Calcul_et_modelisation_MOS3.6/GAM2022_Seance1/mesh_computational_geometry/Mesh_Computational_Geometry.pro</value>
     <value type="bool" key="RunConfiguration.UseCppDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>
     <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>

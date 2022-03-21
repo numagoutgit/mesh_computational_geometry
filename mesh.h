@@ -18,16 +18,31 @@ public:
 
 //** TP : TO MODIFY
 
+class Triangle
+{
+public:
+    std::vector<int> point_indices;
+    std::vector<int> adj_triangle;
+
+    Triangle():point_indices(3),adj_triangle(3) {};
+    Triangle(int pi, int pj, int pk, int ti, int tj, int tk);
+};
+
 class Mesh
 {
   // (Q ou STL)Vector of vertices
+    std::vector<Point> points;
   // (Q ou STL)Vector of faces
+    std::vector<Triangle> triangles;
   // Those who do not know about STL Vectors should have a look at cplusplus.com examples
 public:
-    //Mesh(); // Constructors automatically called to initialize a Mesh (default strategy)
+    Mesh() {}; // Constructors automatically called to initialize a Mesh (default strategy)
     //~Mesh(); // Destructor automatically called before a Mesh is destroyed (default strategy)
-    //void drawMesh();
-    //void drawMeshWireFrame();
+    void drawMesh();
+    void drawMeshWireFrame();
+    void buildTetrahedron(double width, double depth, double height);
+    void buildPyramid(double width, double depth, double height);
+    void buildInput(char const *path_to_mesh, double width, double depth, double height);
 };
 
 class GeometricWorld //Here used to create a singleton instance

@@ -13,6 +13,7 @@ GLDisplayWidget::GLDisplayWidget(QWidget *parent) : QGLWidget(parent), _X(0.f), 
     // Update the scene
     connect( &_timer, SIGNAL(timeout()), this, SLOT(updateGL())); //UpgradeQt6: connect( &_timer, SIGNAL(timeout()), this, SLOT(update()));
     _timer.start(16); // Starts or restarts the timer with a timeout interval of 16 milliseconds.
+    wireFrame = false;
 }
 
 void GLDisplayWidget::initializeGL()
@@ -28,6 +29,9 @@ void GLDisplayWidget::initializeGL()
     //** TP : To add....
     // Construction of the GeometricWorld before it is displayed
     // It can also be constructed following a signal (button)
+    // _mesh.buildTetrahedron(0.5,0.6,0.8);
+    // _mesh.buildPyramid(0.5,0.6,0.8);
+    _mesh.buildInput("../meshes/queen.off", 5,5,5);
 }
 
 void GLDisplayWidget::paintGL(){
@@ -49,8 +53,15 @@ void GLDisplayWidget::paintGL(){
     glColor3f(0, 1 ,0);
 
     // example with a tetraedre
-    _geomWorld.drawWireFrame();
+    //_geomWorld.drawWireFrame();
     //_geomWorld.draw();
+
+    // With the mesh
+    if (wireFrame) {
+        _mesh.drawMeshWireFrame(); // Draw vertex
+    } else {
+        _mesh.drawMesh(); // Full face
+    };
 }
 
 void GLDisplayWidget::resizeGL(int width, int height){
@@ -75,11 +86,12 @@ void GLDisplayWidget::mousePressEvent(QMouseEvent *event)
 void GLDisplayWidget::mouseMoveEvent(QMouseEvent *event)
 {
     int dx = event->x() - _lastPosMouse.x();
-    // int dy = event->y() - lastPosMouse.y();
+    int dy = event->y() - _lastPosMouse.y();
 
     if( event != NULL )
     {
         _angle += dx;
+        _angle += dy;
         _lastPosMouse = event->pos();
 
         updateGL(); //UpgradeQt6: update();

@@ -30,11 +30,11 @@
      </sizepolicy>
     </property>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>150</y>
+      <x>50</x>
+      <y>270</y>
       <width>91</width>
       <height>35</height>
      </rect>
@@ -47,8 +47,24 @@
        </property>
       </widget>
      </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="verticalLayoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>150</y>
+      <width>131</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <layout class="QVBoxLayout" name="verticalLayout"/>
+      <widget class="QPushButton" name="pushButton_2">
+       <property name="text">
+        <string>Change Display</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </widget>
@@ -80,14 +96,33 @@
    <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>90</x>
-     <y>179</y>
+     <x>96</x>
+     <y>308</y>
     </hint>
     <hint type="destinationlabel">
-     <x>39</x>
-     <y>65</y>
+     <x>59</x>
+     <y>268</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton_2</sender>
+   <signal>released()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>changeDisplay()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>114</x>
+     <y>178</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>22</x>
+     <y>142</y>
     </hint>
    </hints>
   </connection>
  </connections>
+ <slots>
+  <slot>changeDisplay()</slot>
+ </slots>
 </ui>

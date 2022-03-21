@@ -15,6 +15,9 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+public slots:
+    void changeDisplay();
+
 private:
     Ui::MainWindow *ui;
 };
