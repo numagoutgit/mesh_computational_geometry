@@ -10,9 +10,10 @@ public:
     double _x;
     double _y;
     double _z;
+    int triangle_indice;
 
-    Point():_x(),_y(),_z() {}
-    Point(float x_, float y_, float z_):_x(x_),_y(y_),_z(z_) {}
+    Point():_x(),_y(),_z(),triangle_indice() {}
+    Point(float x_, float y_, float z_):_x(x_),_y(y_),_z(z_),triangle_indice() {}
 };
 
 
@@ -38,11 +39,56 @@ class Mesh
 public:
     Mesh() {}; // Constructors automatically called to initialize a Mesh (default strategy)
     //~Mesh(); // Destructor automatically called before a Mesh is destroyed (default strategy)
+    Point* getPoint(int i);
+    Triangle* getTriangle(int i);
+    int faceSize();
+    int verticesSize();
     void drawMesh();
     void drawMeshWireFrame();
     void buildTetrahedron(double width, double depth, double height);
     void buildPyramid(double width, double depth, double height);
     void buildInput(char const *path_to_mesh, double width, double depth, double height);
+};
+
+class Iterator_on_faces {
+public:
+    int face_indice;
+    Mesh* related_mesh;
+    Iterator_on_faces(Mesh* mesh);
+    void operator++();
+    Triangle* operator*();
+    bool face_end();
+};
+
+class Iterator_on_vertices {
+public:
+    int vertex_indice;
+    Mesh* related_mesh;
+    Iterator_on_vertices(Mesh* mesh);
+    void operator++();
+    Point* operator*();
+    bool vertex_end();
+};
+
+class Circulator_on_faces {
+public:
+    int face_indice;
+    int related_vertex_indice;
+    Mesh* related_mesh;
+    Circulator_on_faces(Mesh* mesh, int related_vertex_indice);
+    void operator++();
+    Triangle* operator*();
+};
+
+class Circulator_on_vertices {
+public:
+    int vertex_indice;
+    int face_indice;
+    Mesh* related_mesh;
+    int related_vertex_indice;
+    Circulator_on_vertices(Mesh* mesh, int related_vertex_indice);
+    void operator++();
+    Point* operator*();
 };
 
 class GeometricWorld //Here used to create a singleton instance

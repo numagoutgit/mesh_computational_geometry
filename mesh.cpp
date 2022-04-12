@@ -30,6 +30,22 @@ Triangle::Triangle(int pi,int pj,int pk,  int ti,int tj,int tk) : Triangle() {
     adj_triangle[2] = tk;
 };
 
+Point* Mesh::getPoint(int i) {
+    return &points[i];
+};
+
+Triangle* Mesh::getTriangle(int i) {
+    return &triangles[i];
+}
+
+int Mesh::faceSize() {
+    return triangles.size();
+};
+
+int Mesh::verticesSize() {
+    return points.size();
+};
+
 void Mesh::buildTetrahedron(double width, double depth, double height) {
     // Build hardcoded tetrahedron (triangle based pyramid)
     points.push_back(Point(-0.5*width,-0.5*depth,-0.5*height)); //0
@@ -128,6 +144,9 @@ void Mesh::buildInput(char const *path_to_mesh, double width, double depth, doub
         edge_to_triangle[indice_tuple(pi,pj)].push_back(i);
         edge_to_triangle[indice_tuple(pi,pk)].push_back(i);
         edge_to_triangle[indice_tuple(pk,pj)].push_back(i);
+        points[pi].triangle_indice = i;
+        points[pj].triangle_indice = i;
+        points[pk].triangle_indice = i;
     }
     fclose(f);
 
@@ -157,6 +176,100 @@ void Mesh::buildInput(char const *path_to_mesh, double width, double depth, doub
         }
     }
 };
+
+Iterator_on_faces::Iterator_on_faces(Mesh* mesh) {
+    related_mesh = mesh;
+    face_indice = 0;
+};
+
+void Iterator_on_faces::operator++() {
+    ++face_indice;
+};
+
+Triangle* Iterator_on_faces::operator*() {
+    return related_mesh->getTriangle(face_indice);
+};
+
+bool Iterator_on_faces::face_end() {
+    return face_indice == related_mesh->faceSize();
+};
+
+Iterator_on_vertices::Iterator_on_vertices(Mesh* mesh) {
+    related_mesh = mesh;
+    vertex_indice = 0;
+};
+
+void Iterator_on_vertices::operator++() {
+    ++vertex_indice;
+};
+
+Point* Iterator_on_vertices::operator*() {
+    return related_mesh->getPoint(vertex_indice);
+};
+
+bool Iterator_on_vertices::vertex_end() {
+    return vertex_indice == related_mesh->verticesSize();
+};
+
+Circulator_on_faces::Circulator_on_faces(Mesh* mesh, int related_vertex_indice) {
+    related_mesh = mesh;
+    this->related_vertex_indice = related_vertex_indice;
+    face_indice = mesh->getPoint(related_vertex_indice)->triangle_indice;
+};
+
+Triangle* Circulator_on_faces::operator*() {
+    return related_mesh->getTriangle(face_indice);
+};
+
+void Circulator_on_faces::operator++() {
+    Triangle* triangle_on = **this;
+    if (related_vertex_indice == triangle_on->point_indices[0]) {
+        face_indice = triangle_on->adj_triangle[1];
+    } else if (related_vertex_indice == triangle_on->point_indices[1]) {
+        face_indice = triangle_on->adj_triangle[2];
+    } else {
+        face_indice = triangle_on->adj_triangle[0];
+    }
+};
+
+Circulator_on_vertices::Circulator_on_vertices(Mesh* mesh, int related_vertex_indice) {
+    related_mesh = mesh;
+    this->related_vertex_indice = related_vertex_indice;
+    face_indice = mesh->getPoint(related_vertex_indice)->triangle_indice;
+    Triangle* triangle_on = mesh->getTriangle(face_indice);
+    if (related_vertex_indice == triangle_on->point_indices[0]) {
+        vertex_indice = triangle_on->point_indices[1];
+    } else if (related_vertex_indice == triangle_on->point_indices[1]) {
+        vertex_indice = triangle_on->point_indices[2];
+    } else {
+        vertex_indice = triangle_on->point_indices[0];
+    }
+};
+
+Point* Circulator_on_vertices::operator*() {
+    return related_mesh->getPoint(vertex_indice);
+};
+
+void Circulator_on_vertices::operator++() {
+    Triangle* triangle_on = related_mesh->getTriangle(face_indice);
+    if (related_vertex_indice == triangle_on->point_indices[0]) {
+        face_indice = triangle_on->adj_triangle[1];
+    } else if (related_vertex_indice == triangle_on->point_indices[1]) {
+        face_indice = triangle_on->adj_triangle[2];
+    } else {
+        face_indice = triangle_on->adj_triangle[0];
+    }
+    triangle_on = related_mesh->getTriangle(face_indice);
+    if (related_vertex_indice == triangle_on->point_indices[0]) {
+        vertex_indice = triangle_on->point_indices[1];
+    } else if (related_vertex_indice == triangle_on->point_indices[1]) {
+        vertex_indice = triangle_on->point_indices[2];
+    } else {
+        vertex_indice = triangle_on->point_indices[0];
+    }
+}
+
+// DRAWING FEATURES
 
 void Mesh::drawMesh() {
     for (auto& triangle : triangles) {
