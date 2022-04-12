@@ -31,7 +31,8 @@ void GLDisplayWidget::initializeGL()
     // It can also be constructed following a signal (button)
     // _mesh.buildTetrahedron(0.5,0.6,0.8);
     // _mesh.buildPyramid(0.5,0.6,0.8);
-    _mesh.buildInput("../meshes/queen.off", 5,5,5);
+    // _mesh.buildInput("../meshes/queen.off", 5,5,5);
+    _mesh.buildInput("../meshes/cube.off", 0.5,0.6,0.8);
 }
 
 void GLDisplayWidget::paintGL(){

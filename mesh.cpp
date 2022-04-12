@@ -93,14 +93,23 @@ void Mesh::buildInput(char const *path_to_mesh, double width, double depth, doub
     }
     char line[255];
     if (!fgets(line, 255, f)) return;
-    int number_vertices;
-    int number_faces;
-    sscanf(line, "%d %d 0", &number_vertices, &number_faces);
+    // int number_vertices;
+    // int number_faces;
+    // sscanf(line, "%d %d 0", &number_vertices, &number_faces);
+    QString qline = QString(line);
+    QStringList metadata = qline.split(' ');
+    int number_vertices = metadata[0].toInt();
+    int number_faces = metadata[1].toInt();
     for (int i = 0; i < number_vertices; ++i) {
         char line[255];
         if (!fgets(line, 255, f)) break;
-        double x,y,z;
-        sscanf(line, "%lf %lf %lf", &x,&y,&z);
+        // double x,y,z;
+        // sscanf(line, "%lf %lf %lf", &x,&y,&z);
+        QString qline = QString(line);
+        QStringList coords = qline.split(' ');
+        double x = coords[0].toDouble();
+        double y = coords[1].toDouble();
+        double z = coords[2].toDouble();
         points.push_back(Point(x*width, y*depth, z*height));
     }
 
@@ -108,8 +117,13 @@ void Mesh::buildInput(char const *path_to_mesh, double width, double depth, doub
     for (int i = 0; i < number_faces; ++i) {
         char line[255];
         if (!fgets(line, 255, f)) break;
-        int pi,pj,pk;
-        sscanf(line, "3 %d %d %d", &pi, &pj, &pk);
+        // int pi,pj,pk;
+        // sscanf(line, "3 %d %d %d", &pi, &pj, &pk);
+        QString qline = QString(line);
+        QStringList indices = qline.split(' ');
+        int pi = indices[1].toInt();
+        int pj = indices[2].toInt();
+        int pk = indices[3].toInt();
         triangles.push_back(Triangle(pi,pj,pk, 0,0,0));
         edge_to_triangle[indice_tuple(pi,pj)].push_back(i);
         edge_to_triangle[indice_tuple(pi,pk)].push_back(i);
