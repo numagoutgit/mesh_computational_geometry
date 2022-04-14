@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <map>
 #include <QDebug>
+#include <math.h>
 
 #include "mesh.h"
 
@@ -14,6 +15,51 @@ GeometricWorld::GeometricWorld()
 }
 
 // The following functions could be displaced into a module OpenGLDisplayGeometricWorld that would include mesh.h
+
+double Point::norm2() const {
+    return _x*_x + _y*_y + _z*_z;
+};
+
+double Point::norm() const {
+    return sqrt(norm2());
+}
+
+Point Point::normalize() {
+    double n = norm();
+    return Point(_x/n,_y/n,_z/n);
+};
+
+Point operator+(const Point& A, const Point& B) {
+    return Point(A._x+B._x,A._y+B._y,A._z+B._z);
+};
+
+Point operator-(const Point& A, const Point& B) {
+    return Point(A._x-B._x,A._y-B._y,A._z-B._z);
+};
+
+Point operator*(const Point& A, const double b) {
+    return Point(A._x*b,A._y*b,A._z*b);
+};
+
+Point operator*(const double b, const Point& A) {
+    return Point(A._x*b,A._y*b,A._z*b);
+};
+
+Point operator/(const Point& A, const double b) {
+    return Point(A._x/b,A._y/b,A._z/b);
+};
+
+double dot(const Point& A, const Point& B) {
+    return A._x*B._x+A._y*B._y+A._z*B._z;
+};
+
+Point cross(const Point& A, const Point& B) {
+    return Point(
+                A._y*B._z - A._z*B._y,
+                A._z*B._x - A._x*B._z,
+                A._x*B._y - A._y*B._x
+                );
+};
 
 // Draw a Point
 void glPointDraw(const Point & p) {
@@ -177,6 +223,32 @@ void Mesh::buildInput(char const *path_to_mesh, double width, double depth, doub
     }
 };
 
+Point Mesh::getCrossTriangle(Triangle* ti, int j) {
+    if (j == 0) {
+        return cross(points[ti->point_indices[1]]-points[ti->point_indices[0]],
+                points[ti->point_indices[2]]-points[ti->point_indices[0]]);
+    } else if (j == 1) {
+        return cross(points[ti->point_indices[2]]-points[ti->point_indices[1]],
+                points[ti->point_indices[0]]-points[ti->point_indices[1]]);
+    } else {
+        return cross(points[ti->point_indices[0]]-points[ti->point_indices[2]],
+                points[ti->point_indices[1]]-points[ti->point_indices[2]]);
+    }
+};
+
+double Mesh::getDotTriangle(Triangle* ti, int j) {
+    if (j == 0) {
+        return dot(points[ti->point_indices[1]]-points[ti->point_indices[0]],
+                points[ti->point_indices[2]]-points[ti->point_indices[0]]);
+    } else if (j == 1) {
+        return dot(points[ti->point_indices[2]]-points[ti->point_indices[1]],
+                points[ti->point_indices[0]]-points[ti->point_indices[1]]);
+    } else {
+        return dot(points[ti->point_indices[0]]-points[ti->point_indices[2]],
+                points[ti->point_indices[1]]-points[ti->point_indices[2]]);
+    }
+};
+
 Iterator_on_faces::Iterator_on_faces(Mesh* mesh) {
     related_mesh = mesh;
     face_indice = 0;
@@ -268,6 +340,66 @@ void Circulator_on_vertices::operator++() {
         vertex_indice = triangle_on->point_indices[0];
     }
 }
+
+Point Mesh::computeLaplacian(int i) {
+    Circulator_on_vertices circu = Circulator_on_vertices(this, i);
+    int starting_vertex = circu.vertex_indice;
+    double aera = 0;
+    double laplacian_x = 0;
+    double laplacian_y = 0;
+    double laplacian_z = 0;
+    do {
+        Triangle* right_triangle = getTriangle(circu.face_indice);
+        Triangle* left_triangle;
+        int right_triangle_angle_indice;
+        int left_triangle_angle_indice;
+        if (circu.vertex_indice == right_triangle->point_indices[0]) {
+            left_triangle = getTriangle(right_triangle->adj_triangle[1]);
+            right_triangle_angle_indice = 1;
+        } else if (circu.vertex_indice == right_triangle->point_indices[1]) {
+            left_triangle = getTriangle(right_triangle->adj_triangle[2]);
+            right_triangle_angle_indice = 2;
+        } else {
+            left_triangle = getTriangle(right_triangle->adj_triangle[0]);
+            right_triangle_angle_indice = 0;
+        }
+
+        if (circu.vertex_indice == left_triangle->point_indices[0]) {
+            left_triangle_angle_indice = 2;
+        } else if (circu.vertex_indice == left_triangle->point_indices[1]) {
+            left_triangle_angle_indice = 0;
+        } else {
+            left_triangle_angle_indice = 1;
+        }
+        Point cross_right = getCrossTriangle(right_triangle, right_triangle_angle_indice);
+        Point cross_left = getCrossTriangle(left_triangle, left_triangle_angle_indice);
+        double cross_right_norm = cross_right.norm();
+        double cross_left_norm = cross_left.norm();
+        double dot_right = getDotTriangle(right_triangle, right_triangle_angle_indice);
+        double dot_left = getDotTriangle(left_triangle, left_triangle_angle_indice);
+
+        double cotan_right = dot_right/cross_right_norm;
+        double cotan_left = dot_left/cross_left_norm;
+        Point* rotating_point = getPoint(circu.vertex_indice);
+        Point* center_point = getPoint(i);
+
+        aera += cross_right_norm;
+        laplacian_x += (cotan_left+cotan_right)*(rotating_point->_x-center_point->_x);
+        laplacian_y += (cotan_left+cotan_right)*(rotating_point->_y-center_point->_y);
+        laplacian_z += (cotan_left+cotan_right)*(rotating_point->_z-center_point->_z);
+
+        ++circu;
+    } while (circu.vertex_indice != starting_vertex);
+
+    double invert_aera = 3/aera;
+    return Point(invert_aera*laplacian_x, invert_aera*laplacian_y,invert_aera*laplacian_z);
+};
+
+void Mesh::computeLaplacians() {
+    for (Iterator_on_vertices itv = Iterator_on_vertices(this); itv.vertex_end(); ++itv) {
+        laplacian.push_back(computeLaplacian(itv.vertex_indice));
+    }
+};
 
 // DRAWING FEATURES
 

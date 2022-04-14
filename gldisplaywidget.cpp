@@ -34,16 +34,22 @@ void GLDisplayWidget::initializeGL()
     // _mesh.buildInput("../meshes/queen.off", 5,5,5);
     // _mesh.buildInput("../meshes/cube.off", 0.5,0.6,0.8);
     _mesh.buildInput("../meshes/tetrahedre.off", 0.5,0.6,0.8);
-    // _mesh.buildInput("../meshes/plan.off", 0.5,0.6,0.8);
+    // _mesh.buildInput("../meshes/plan.off", 1,1,1);
+    // _mesh.buildInput("../meshes/equilateral.off", 1,1,1);
 
 
     // TEST ITERATOR
-    Circulator_on_vertices civ = Circulator_on_vertices(&_mesh, 3);
-    qDebug() << civ.vertex_indice;
+    Circulator_on_vertices civ = Circulator_on_vertices(&_mesh, 2);
+    qDebug() << civ.vertex_indice << " " << civ.face_indice;
     ++civ;
-    qDebug() << civ.vertex_indice;
+    qDebug() << civ.vertex_indice << " " << civ.face_indice;
     ++civ;
-    qDebug() << civ.vertex_indice;
+    qDebug() << civ.vertex_indice << " " << civ.face_indice;
+    ++civ;
+    qDebug() << civ.vertex_indice << " " << civ.face_indice;
+
+    _mesh.computeLaplacians();
+    // qDebug() << _mesh.laplacian;
 }
 
 void GLDisplayWidget::paintGL(){

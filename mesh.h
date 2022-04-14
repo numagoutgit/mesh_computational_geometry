@@ -13,8 +13,20 @@ public:
     int triangle_indice;
 
     Point():_x(),_y(),_z(),triangle_indice() {}
-    Point(float x_, float y_, float z_):_x(x_),_y(y_),_z(z_),triangle_indice() {}
+    Point(double x_, double y_, double z_):_x(x_),_y(y_),_z(z_),triangle_indice() {}
+
+    double norm2() const;
+    double norm() const;
+    Point normalize();
 };
+
+Point operator+(const Point& A, const Point& B);
+Point operator-(const Point& A, const Point& B);
+Point operator*(const Point& A, const double b);
+Point operator*(const double b, const Point& A);
+Point operator/(const Point& A, const double b);
+double dot(const Point& A, const Point& B);
+Point cross(const Point& A, const Point& B);
 
 
 //** TP : TO MODIFY
@@ -37,6 +49,8 @@ class Mesh
     std::vector<Triangle> triangles;
   // Those who do not know about STL Vectors should have a look at cplusplus.com examples
 public:
+    std::vector<Point> laplacian;
+    std::vector<double> courbure;
     Mesh() {}; // Constructors automatically called to initialize a Mesh (default strategy)
     //~Mesh(); // Destructor automatically called before a Mesh is destroyed (default strategy)
     Point* getPoint(int i);
@@ -48,6 +62,11 @@ public:
     void buildTetrahedron(double width, double depth, double height);
     void buildPyramid(double width, double depth, double height);
     void buildInput(char const *path_to_mesh, double width, double depth, double height);
+    Point getCrossTriangle(Triangle* ti, int j);
+    double getDotTriangle(Triangle* ti, int j);
+
+    Point computeLaplacian(int i);
+    void computeLaplacians();
 };
 
 class Iterator_on_faces {
