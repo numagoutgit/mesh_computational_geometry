@@ -20,6 +20,7 @@ public:
     void resizeGL(int width, int height);
 
     bool wireFrame;
+    bool laplacian;
 
 protected:
     // Mouse Management

@@ -14,6 +14,7 @@ GLDisplayWidget::GLDisplayWidget(QWidget *parent) : QGLWidget(parent), _X(0.f), 
     connect( &_timer, SIGNAL(timeout()), this, SLOT(updateGL())); //UpgradeQt6: connect( &_timer, SIGNAL(timeout()), this, SLOT(update()));
     _timer.start(16); // Starts or restarts the timer with a timeout interval of 16 milliseconds.
     wireFrame = false;
+    laplacian = false;
 }
 
 void GLDisplayWidget::initializeGL()
@@ -31,9 +32,9 @@ void GLDisplayWidget::initializeGL()
     // It can also be constructed following a signal (button)
     // _mesh.buildTetrahedron(0.5,0.6,0.8);
     // _mesh.buildPyramid(0.5,0.6,0.8);
-    // _mesh.buildInput("../meshes/queen.off", 5,5,5);
+    _mesh.buildInput("../meshes/queen.off", 5,5,5);
     // _mesh.buildInput("../meshes/cube.off", 0.5,0.6,0.8);
-    _mesh.buildInput("../meshes/tetrahedre.off", 0.5,0.6,0.8);
+    // _mesh.buildInput("../meshes/tetrahedre.off", 0.5,0.6,0.8);
     // _mesh.buildInput("../meshes/plan.off", 1,1,1);
     // _mesh.buildInput("../meshes/equilateral.off", 1,1,1);
 
@@ -78,7 +79,7 @@ void GLDisplayWidget::paintGL(){
     if (wireFrame) {
         _mesh.drawMeshWireFrame(); // Draw vertex
     } else {
-        _mesh.drawMesh(); // Full face
+        _mesh.drawMesh(laplacian); // Full face
     };
 }
 

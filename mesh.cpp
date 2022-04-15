@@ -396,40 +396,57 @@ Point Mesh::computeLaplacian(int i) {
 };
 
 void Mesh::computeLaplacians() {
-    for (Iterator_on_vertices itv = Iterator_on_vertices(this); itv.vertex_end(); ++itv) {
-        laplacian.push_back(computeLaplacian(itv.vertex_indice));
+    for (Iterator_on_vertices itv = Iterator_on_vertices(this); !itv.vertex_end(); ++itv) {
+        Point laplacian_i = computeLaplacian(itv.vertex_indice);
+        if (abs(laplacian_i._x) > maxLaplacian._x) maxLaplacian._x = abs(laplacian_i._x);
+        if (abs(laplacian_i._y) > maxLaplacian._y) maxLaplacian._y = abs(laplacian_i._y);
+        if (abs(laplacian_i._z) > maxLaplacian._z) maxLaplacian._z = abs(laplacian_i._z);
+
+        if (abs(laplacian_i._x) < minLaplacian._x) minLaplacian._x = abs(laplacian_i._x);
+        if (abs(laplacian_i._y) < minLaplacian._y) minLaplacian._y = abs(laplacian_i._y);
+        if (abs(laplacian_i._z) < minLaplacian._z) minLaplacian._z = abs(laplacian_i._z);
+
+        laplacians.push_back(laplacian_i);
     }
+
 };
 
 // DRAWING FEATURES
 
-void Mesh::drawMesh() {
+void Mesh::drawMesh(bool laplacian) {
     for (auto& triangle : triangles) {
-        glColor3d(0.5,0.5,0.5);
+        if (laplacian) {
+            Point medLaplacian = (laplacians[triangle.point_indices[0]]+laplacians[triangle.point_indices[1]]+laplacians[triangle.point_indices[2]])/3;
+            glColor3d((abs(medLaplacian._x)-minLaplacian._x)/(maxLaplacian._x-minLaplacian._x),
+                      (abs(medLaplacian._y)-minLaplacian._y)/(maxLaplacian._y-minLaplacian._y),
+                      (abs(medLaplacian._z)-minLaplacian._z)/(maxLaplacian._z-minLaplacian._z));
+        } else {
+            glColor3d(0.3,0.3,0.6);
+        };
         glBegin(GL_TRIANGLES);
         glPointDraw(points[triangle.point_indices[0]]);
         glPointDraw(points[triangle.point_indices[1]]);
         glPointDraw(points[triangle.point_indices[2]]);
         glEnd();
     };
-    drawMeshWireFrame();
+    if (not laplacian) drawMeshWireFrame();
 };
 
 void Mesh::drawMeshWireFrame() {
     for (auto& triangle : triangles) {
-        glColor3d(0.3,0.3,0.3);
+        glColor3d(0.5,0.5,0.5);
         glBegin(GL_LINE_STRIP);
         glPointDraw(points[triangle.point_indices[0]]);
         glPointDraw(points[triangle.point_indices[1]]);
         glEnd();
 
-        glColor3d(0.4,0.4,0.4);
+        glColor3d(0.5,0.5,0.5);
         glBegin(GL_LINE_STRIP);
         glPointDraw(points[triangle.point_indices[1]]);
         glPointDraw(points[triangle.point_indices[2]]);
         glEnd();
 
-        glColor3d(0.4,0.4,0.4);
+        glColor3d(0.5,0.5,0.5);
         glBegin(GL_LINE_STRIP);
         glPointDraw(points[triangle.point_indices[2]]);
         glPointDraw(points[triangle.point_indices[0]]);

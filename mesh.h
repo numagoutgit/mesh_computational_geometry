@@ -49,15 +49,16 @@ class Mesh
     std::vector<Triangle> triangles;
   // Those who do not know about STL Vectors should have a look at cplusplus.com examples
 public:
-    std::vector<Point> laplacian;
-    std::vector<double> courbure;
+    std::vector<Point> laplacians;
+    Point maxLaplacian;
+    Point minLaplacian;
     Mesh() {}; // Constructors automatically called to initialize a Mesh (default strategy)
     //~Mesh(); // Destructor automatically called before a Mesh is destroyed (default strategy)
     Point* getPoint(int i);
     Triangle* getTriangle(int i);
     int faceSize();
     int verticesSize();
-    void drawMesh();
+    void drawMesh(bool laplacian);
     void drawMeshWireFrame();
     void buildTetrahedron(double width, double depth, double height);
     void buildPyramid(double width, double depth, double height);
