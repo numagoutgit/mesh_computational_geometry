@@ -68,6 +68,8 @@ public:
 
     Point computeLaplacian(int i);
     void computeLaplacians();
+
+    void triangleSplit(Point& middlePoint, int i);
 };
 
 class Iterator_on_faces {

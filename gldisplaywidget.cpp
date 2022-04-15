@@ -32,24 +32,27 @@ void GLDisplayWidget::initializeGL()
     // It can also be constructed following a signal (button)
     // _mesh.buildTetrahedron(0.5,0.6,0.8);
     // _mesh.buildPyramid(0.5,0.6,0.8);
-    _mesh.buildInput("../meshes/queen.off", 5,5,5);
+    // _mesh.buildInput("../meshes/queen.off", 5,5,5);
     // _mesh.buildInput("../meshes/cube.off", 0.5,0.6,0.8);
     // _mesh.buildInput("../meshes/tetrahedre.off", 0.5,0.6,0.8);
     // _mesh.buildInput("../meshes/plan.off", 1,1,1);
-    // _mesh.buildInput("../meshes/equilateral.off", 1,1,1);
+    _mesh.buildInput("../meshes/equilateral.off", 0.7,0.7,0.7);
 
 
     // TEST ITERATOR
-    Circulator_on_vertices civ = Circulator_on_vertices(&_mesh, 2);
-    qDebug() << civ.vertex_indice << " " << civ.face_indice;
-    ++civ;
-    qDebug() << civ.vertex_indice << " " << civ.face_indice;
-    ++civ;
-    qDebug() << civ.vertex_indice << " " << civ.face_indice;
-    ++civ;
-    qDebug() << civ.vertex_indice << " " << civ.face_indice;
+    // Circulator_on_vertices civ = Circulator_on_vertices(&_mesh, 2);
+    // qDebug() << civ.vertex_indice << " " << civ.face_indice;
+    // ++civ;
+    // qDebug() << civ.vertex_indice << " " << civ.face_indice;
+    // ++civ;
+    // qDebug() << civ.vertex_indice << " " << civ.face_indice;
+    // ++civ;
+    // qDebug() << civ.vertex_indice << " " << civ.face_indice;
 
-    _mesh.computeLaplacians();
+    Point middle = Point(0,1,0);
+    _mesh.triangleSplit(middle,1);
+
+    // _mesh.computeLaplacians();
     // qDebug() << _mesh.laplacian;
 }
 

@@ -186,7 +186,7 @@ void Mesh::buildInput(char const *path_to_mesh, double width, double depth, doub
         int pi = indices[1].toInt();
         int pj = indices[2].toInt();
         int pk = indices[3].toInt();
-        triangles.push_back(Triangle(pi,pj,pk, 0,0,0));
+        triangles.push_back(Triangle(pi,pj,pk, -1,-1,-1));
         edge_to_triangle[indice_tuple(pi,pj)].push_back(i);
         edge_to_triangle[indice_tuple(pi,pk)].push_back(i);
         edge_to_triangle[indice_tuple(pk,pj)].push_back(i);
@@ -206,17 +206,17 @@ void Mesh::buildInput(char const *path_to_mesh, double width, double depth, doub
         std::vector<int> triangle_j = edge_to_triangle[indice_tuple(pi, pk)];
         std::vector<int> triangle_k = edge_to_triangle[indice_tuple(pi, pj)];
         if (triangle_i[0] == indice) {
-            triangles[indice].adj_triangle[0] = triangle_i[1];
+            if (triangle_i.size() == 2) {triangles[indice].adj_triangle[0] = triangle_i[1];}
         } else {
             triangles[indice].adj_triangle[0] = triangle_i[0];
         }
         if (triangle_j[0] == indice) {
-            triangles[indice].adj_triangle[1] = triangle_j[1];
+            if (triangle_j.size() == 2) {triangles[indice].adj_triangle[1] = triangle_j[1];}
         } else {
             triangles[indice].adj_triangle[1] = triangle_j[0];
         }
         if (triangle_k[0] == indice) {
-            triangles[indice].adj_triangle[2] = triangle_k[1];
+            if (triangle_k.size() == 2) {triangles[indice].adj_triangle[2] = triangle_k[1];}
         } else {
             triangles[indice].adj_triangle[2] = triangle_k[0];
         }
@@ -409,6 +409,42 @@ void Mesh::computeLaplacians() {
         laplacians.push_back(laplacian_i);
     }
 
+};
+
+void Mesh::triangleSplit(Point& middlePoint, int i) {
+    Triangle* triangleSplitted = getTriangle(i);
+    Triangle triangleSplitted_real = *triangleSplitted;
+    int nb_vertices = verticesSize();
+    int nb_triangles = faceSize();
+    points.push_back(middlePoint);
+    for (int k =0; k<3; ++k) {
+        triangles.push_back(
+            Triangle(
+                triangleSplitted_real.point_indices[k%3],
+                triangleSplitted_real.point_indices[(k+1)%3],
+                nb_vertices,
+                nb_triangles+(k+1)%3,
+                nb_triangles+(k+2)%3,
+                triangleSplitted_real.adj_triangle[(k+2)%3]
+            )
+        );
+    }
+    for (int k = 0; k < 3; ++k) {
+        Triangle* neighbour = getTriangle(triangleSplitted_real.adj_triangle[k]);
+        if (i == neighbour->adj_triangle[0]) {
+            neighbour->adj_triangle[0] = nb_triangles+(k+1)%3;
+        } else if (i == neighbour->adj_triangle[1]) {
+            neighbour->adj_triangle[1] = nb_triangles+(k+1)%3;
+        } else {
+            neighbour->adj_triangle[2] = nb_triangles+(k+1)%3;
+        }
+    }
+    triangles.erase(triangles.begin()+i);
+    for (Triangle& triangle : triangles) {
+        for (int k = 0; k < 3; ++k) {
+            if (triangle.adj_triangle[k] >= i) {--triangle.adj_triangle[k];}
+        }
+    }
 };
 
 // DRAWING FEATURES
