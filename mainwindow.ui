@@ -53,8 +53,8 @@
     <property name="geometry">
      <rect>
       <x>30</x>
-      <y>150</y>
-      <width>131</width>
+      <y>210</y>
+      <width>135</width>
       <height>41</height>
      </rect>
     </property>
@@ -62,7 +62,26 @@
      <item>
       <widget class="QPushButton" name="pushButton_2">
        <property name="text">
-        <string>Change Display</string>
+        <string>Display wireFrame</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="verticalLayoutWidget_2">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>160</y>
+      <width>141</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout_3">
+     <item>
+      <widget class="QPushButton" name="pushButton_3">
+       <property name="text">
+        <string>Display Laplacian</string>
        </property>
       </widget>
      </item>
@@ -109,11 +128,11 @@
    <sender>pushButton_2</sender>
    <signal>released()</signal>
    <receiver>MainWindow</receiver>
-   <slot>changeDisplay()</slot>
+   <slot>displayWireframe()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>114</x>
-     <y>178</y>
+     <x>115</x>
+     <y>259</y>
     </hint>
     <hint type="destinationlabel">
      <x>22</x>
@@ -121,8 +140,25 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>pushButton_3</sender>
+   <signal>pressed()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>displayLaplacian()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>126</x>
+     <y>194</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>46</x>
+     <y>57</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
-  <slot>changeDisplay()</slot>
+  <slot>displayWireframe()</slot>
+  <slot>displayLaplacian()</slot>
  </slots>
 </ui>

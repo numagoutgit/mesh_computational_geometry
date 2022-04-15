@@ -13,7 +13,10 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::changeDisplay() {
+void MainWindow::displayWireframe() {
     ui->widget->wireFrame = not ui->widget->wireFrame;
-    ui->widget->paintGL();
+};
+
+void MainWindow::displayLaplacian() {
+    ui->widget->laplacian = not ui->widget->laplacian;
 };

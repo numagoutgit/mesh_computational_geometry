@@ -16,7 +16,8 @@ public:
     ~MainWindow();
 
 public slots:
-    void changeDisplay();
+    void displayWireframe();
+    void displayLaplacian();
 
 private:
     Ui::MainWindow *ui;
