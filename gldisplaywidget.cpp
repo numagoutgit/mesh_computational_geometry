@@ -40,18 +40,23 @@ void GLDisplayWidget::initializeGL()
 
 
     // TEST ITERATOR
-    // Circulator_on_vertices civ = Circulator_on_vertices(&_mesh, 2);
-    // qDebug() << civ.vertex_indice << " " << civ.face_indice;
-    // ++civ;
-    // qDebug() << civ.vertex_indice << " " << civ.face_indice;
-    // ++civ;
-    // qDebug() << civ.vertex_indice << " " << civ.face_indice;
-    // ++civ;
-    // qDebug() << civ.vertex_indice << " " << civ.face_indice;
+    Circulator_on_vertices civ = Circulator_on_vertices(&_mesh, 3);
+    qDebug() << civ.vertex_indice << " " << civ.right_face_indice;
+    ++civ;
+    qDebug() << civ.vertex_indice << " " << civ.right_face_indice;
+    ++civ;
+    qDebug() << civ.vertex_indice << " " << civ.right_face_indice;
+    ++civ;
+    qDebug() << civ.vertex_indice << " " << civ.right_face_indice;
+    ++civ;
+    qDebug() << civ.vertex_indice << " " << civ.right_face_indice;
+    ++civ;
+    qDebug() << civ.vertex_indice << " " << civ.right_face_indice;
 
-    Point middle = Point(0,1,0);
-    _mesh.triangleSplit(middle,1);
 
+    // Point middle = Point(0,1,0);
+    // _mesh.triangleSplit(middle,1);
+    _mesh.edgeFlip(0,1);
     // _mesh.computeLaplacians();
     // qDebug() << _mesh.laplacian;
 }

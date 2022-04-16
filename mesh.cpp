@@ -224,29 +224,23 @@ void Mesh::buildInput(char const *path_to_mesh, double width, double depth, doub
 };
 
 Point Mesh::getCrossTriangle(Triangle* ti, int j) {
-    if (j == 0) {
-        return cross(points[ti->point_indices[1]]-points[ti->point_indices[0]],
-                points[ti->point_indices[2]]-points[ti->point_indices[0]]);
-    } else if (j == 1) {
-        return cross(points[ti->point_indices[2]]-points[ti->point_indices[1]],
-                points[ti->point_indices[0]]-points[ti->point_indices[1]]);
-    } else {
-        return cross(points[ti->point_indices[0]]-points[ti->point_indices[2]],
-                points[ti->point_indices[1]]-points[ti->point_indices[2]]);
+    for (int k = 0; k<3; ++k) {
+        if (j == k) {
+            return cross(points[ti->point_indices[(k+1)%3]]-points[ti->point_indices[k]],
+                    points[ti->point_indices[(k+2)%3]]-points[ti->point_indices[k]]);
+        }
     }
+    return Point(0,0,0);
 };
 
 double Mesh::getDotTriangle(Triangle* ti, int j) {
-    if (j == 0) {
-        return dot(points[ti->point_indices[1]]-points[ti->point_indices[0]],
-                points[ti->point_indices[2]]-points[ti->point_indices[0]]);
-    } else if (j == 1) {
-        return dot(points[ti->point_indices[2]]-points[ti->point_indices[1]],
-                points[ti->point_indices[0]]-points[ti->point_indices[1]]);
-    } else {
-        return dot(points[ti->point_indices[0]]-points[ti->point_indices[2]],
-                points[ti->point_indices[1]]-points[ti->point_indices[2]]);
+    for (int k = 0; k<3; ++k) {
+        if (j == k) {
+            return dot(points[ti->point_indices[(k+1)%3]]-points[ti->point_indices[k]],
+                    points[ti->point_indices[(k+2)%3]]-points[ti->point_indices[k]]);
+        }
     }
+    return 0;
 };
 
 Iterator_on_faces::Iterator_on_faces(Mesh* mesh) {
@@ -293,28 +287,78 @@ Triangle* Circulator_on_faces::operator*() {
     return related_mesh->getTriangle(face_indice);
 };
 
+Circulator_on_faces Circulator_on_faces::next() {
+    Triangle* triangle_on = **this;
+    Circulator_on_faces new_circ = *this;
+    for (int k = 0; k<3; ++k) {
+        if (related_vertex_indice == triangle_on->point_indices[k]) {
+            new_circ.face_indice = triangle_on->adj_triangle[(k+1)%3];
+        }
+    }
+    return new_circ;
+};
+
+Circulator_on_faces Circulator_on_faces::previous() {
+    Triangle* triangle_on = **this;
+    Circulator_on_faces new_circ = *this;
+    for (int k = 0; k<3; ++k) {
+        if (related_vertex_indice == triangle_on->point_indices[k]) {
+            new_circ.face_indice = triangle_on->adj_triangle[(k+2)%3];
+        }
+    }
+    return new_circ;
+};
+
 void Circulator_on_faces::operator++() {
     Triangle* triangle_on = **this;
-    if (related_vertex_indice == triangle_on->point_indices[0]) {
-        face_indice = triangle_on->adj_triangle[1];
-    } else if (related_vertex_indice == triangle_on->point_indices[1]) {
-        face_indice = triangle_on->adj_triangle[2];
-    } else {
-        face_indice = triangle_on->adj_triangle[0];
+    for (int k = 0; k<3; ++k) {
+        if (related_vertex_indice == triangle_on->point_indices[k]) {
+            int new_indice = triangle_on->adj_triangle[(k+1)%3];
+            if (new_indice != -1) {
+                face_indice = new_indice;
+            } else {
+                Circulator_on_faces prev = previous();
+                while (prev.face_indice != -1) {
+                    face_indice = prev.face_indice;
+                    prev = prev.previous();
+                }
+            }
+
+        }
+    }
+};
+
+void Circulator_on_faces::operator--() {
+    Triangle* triangle_on = **this;
+    for (int k = 0; k<3; ++k) {
+        if (related_vertex_indice == triangle_on->point_indices[k]) {
+            int new_indice = triangle_on->adj_triangle[(k+2)%3];
+            if (new_indice != -1) {
+                face_indice = new_indice;
+            } else {
+                Circulator_on_faces nex = next();
+                while (nex.face_indice != -1) {
+                    face_indice = nex.face_indice;
+                    nex = nex.next();
+                }
+            }
+
+        }
     }
 };
 
 Circulator_on_vertices::Circulator_on_vertices(Mesh* mesh, int related_vertex_indice) {
     related_mesh = mesh;
     this->related_vertex_indice = related_vertex_indice;
-    face_indice = mesh->getPoint(related_vertex_indice)->triangle_indice;
-    Triangle* triangle_on = mesh->getTriangle(face_indice);
-    if (related_vertex_indice == triangle_on->point_indices[0]) {
-        vertex_indice = triangle_on->point_indices[1];
-    } else if (related_vertex_indice == triangle_on->point_indices[1]) {
-        vertex_indice = triangle_on->point_indices[2];
-    } else {
-        vertex_indice = triangle_on->point_indices[0];
+    right_face_indice = mesh->getPoint(related_vertex_indice)->triangle_indice;
+    left_face_indice = -1;
+    vertex_indice = -1;
+    Triangle* triangle_on = mesh->getTriangle(right_face_indice);
+    for (int k = 0; k<3; ++k) {
+        if (related_vertex_indice == triangle_on->point_indices[k]) {
+            vertex_indice = triangle_on->point_indices[(k+1)%3];
+            left_face_indice = triangle_on->adj_triangle[(k+2)%3];
+        }
     }
 };
 
@@ -322,22 +366,72 @@ Point* Circulator_on_vertices::operator*() {
     return related_mesh->getPoint(vertex_indice);
 };
 
-void Circulator_on_vertices::operator++() {
-    Triangle* triangle_on = related_mesh->getTriangle(face_indice);
-    if (related_vertex_indice == triangle_on->point_indices[0]) {
-        face_indice = triangle_on->adj_triangle[1];
-    } else if (related_vertex_indice == triangle_on->point_indices[1]) {
-        face_indice = triangle_on->adj_triangle[2];
-    } else {
-        face_indice = triangle_on->adj_triangle[0];
+Circulator_on_vertices Circulator_on_vertices::next() {
+    Triangle* triangle_on = related_mesh->getTriangle(right_face_indice);
+    Circulator_on_vertices new_circ = *this;
+    for (int k = 0; k<3; ++k) {
+        if (related_vertex_indice == triangle_on->point_indices[k]) {
+            new_circ.left_face_indice = right_face_indice;
+            new_circ.right_face_indice = triangle_on->adj_triangle[(k+1)%3];
+            new_circ.vertex_indice = triangle_on->point_indices[(k+2)%3];
+        }
     }
-    triangle_on = related_mesh->getTriangle(face_indice);
-    if (related_vertex_indice == triangle_on->point_indices[0]) {
-        vertex_indice = triangle_on->point_indices[1];
-    } else if (related_vertex_indice == triangle_on->point_indices[1]) {
-        vertex_indice = triangle_on->point_indices[2];
+    return new_circ;
+};
+
+
+Circulator_on_vertices Circulator_on_vertices::previous() {
+    Triangle* triangle_on = related_mesh->getTriangle(left_face_indice);
+    Circulator_on_vertices new_circ = *this;
+    for (int k = 0; k<3; ++k) {
+        if (related_vertex_indice == triangle_on->point_indices[k]) {
+            new_circ.right_face_indice = left_face_indice;
+            new_circ.left_face_indice = triangle_on->adj_triangle[(k+2)%3];
+            new_circ.vertex_indice = triangle_on->point_indices[(k+1)%3];
+        }
+    }
+    return new_circ;
+};
+
+void Circulator_on_vertices::operator++() {
+    if (right_face_indice != -1) {
+        Triangle* triangle_on = related_mesh->getTriangle(right_face_indice);
+        for (int k = 0; k<3; ++k) {
+            if (related_vertex_indice == triangle_on->point_indices[k]) {
+                left_face_indice = right_face_indice;
+                right_face_indice = triangle_on->adj_triangle[(k+1)%3];
+                vertex_indice = triangle_on->point_indices[(k+2)%3];
+            }
+        }
     } else {
-        vertex_indice = triangle_on->point_indices[0];
+        Circulator_on_vertices prev = *this;
+        do {
+            prev = prev.previous();
+            left_face_indice = prev.left_face_indice;
+            right_face_indice = prev.right_face_indice;
+            vertex_indice = prev.vertex_indice;
+        } while (prev.left_face_indice != -1);
+    }
+}
+
+void Circulator_on_vertices::operator--() {
+    if (left_face_indice != -1) {
+        Triangle* triangle_on = related_mesh->getTriangle(left_face_indice);
+        for (int k = 0; k<3; ++k) {
+            if (related_vertex_indice == triangle_on->point_indices[k]) {
+                right_face_indice = left_face_indice;
+                left_face_indice = triangle_on->adj_triangle[(k+2)%3];
+                vertex_indice = triangle_on->point_indices[(k+1)%3];
+            }
+        }
+    } else {
+        Circulator_on_vertices nex = *this;
+        do {
+            nex = nex.previous();
+            left_face_indice = nex.left_face_indice;
+            right_face_indice = nex.right_face_indice;
+            vertex_indice = nex.vertex_indice;
+        } while (nex.right_face_indice != -1);
     }
 }
 
@@ -349,45 +443,67 @@ Point Mesh::computeLaplacian(int i) {
     double laplacian_y = 0;
     double laplacian_z = 0;
     do {
-        Triangle* right_triangle = getTriangle(circu.face_indice);
-        Triangle* left_triangle;
-        int right_triangle_angle_indice;
-        int left_triangle_angle_indice;
-        if (circu.vertex_indice == right_triangle->point_indices[0]) {
-            left_triangle = getTriangle(right_triangle->adj_triangle[1]);
-            right_triangle_angle_indice = 1;
-        } else if (circu.vertex_indice == right_triangle->point_indices[1]) {
-            left_triangle = getTriangle(right_triangle->adj_triangle[2]);
-            right_triangle_angle_indice = 2;
+        double cotan_right = 0.;
+        double cotan_left = 0.;
+        if (circu.right_face_indice == -1) {
+            Triangle* left_triangle = getTriangle(circu.left_face_indice);
+            int left_triangle_angle_indice = -1;
+            for (int k = 0; k<3; ++k) {
+                if (circu.vertex_indice == left_triangle->point_indices[k]) {
+                    left_triangle_angle_indice = (k+2)%3;
+                }
+            }
+            Point cross_left = getCrossTriangle(left_triangle, left_triangle_angle_indice);
+            double cross_left_norm = cross_left.norm();
+            double dot_left = getDotTriangle(left_triangle, left_triangle_angle_indice);
+            cotan_left = dot_left/cross_left_norm;
+            aera += cross_left_norm;
+        } else if (circu.left_face_indice == -1) {
+            Triangle* right_triangle = getTriangle(circu.right_face_indice);
+            int right_triangle_angle_indice = -1;
+            for (int k = 0; k<3; ++k) {
+                if (circu.vertex_indice == right_triangle->point_indices[k]) {
+                    right_triangle_angle_indice = (k+1)%3;
+                }
+            }
+            Point cross_right = getCrossTriangle(right_triangle, right_triangle_angle_indice);
+            double cross_right_norm = cross_right.norm();
+            double dot_right = getDotTriangle(right_triangle, right_triangle_angle_indice);
+            cotan_right = dot_right/cross_right_norm;
+            aera += cross_right_norm;
         } else {
-            left_triangle = getTriangle(right_triangle->adj_triangle[0]);
-            right_triangle_angle_indice = 0;
-        }
+            Triangle* right_triangle = getTriangle(circu.right_face_indice);
+            Triangle* left_triangle = getTriangle(circu.left_face_indice);
+            int right_triangle_angle_indice = -1;
+            int left_triangle_angle_indice = -1;
+            for (int k = 0; k<3; ++k) {
+                if (circu.vertex_indice == right_triangle->point_indices[k]) {
+                    right_triangle_angle_indice = (k+1)%3;
+                }
+            }
 
-        if (circu.vertex_indice == left_triangle->point_indices[0]) {
-            left_triangle_angle_indice = 2;
-        } else if (circu.vertex_indice == left_triangle->point_indices[1]) {
-            left_triangle_angle_indice = 0;
-        } else {
-            left_triangle_angle_indice = 1;
-        }
-        Point cross_right = getCrossTriangle(right_triangle, right_triangle_angle_indice);
-        Point cross_left = getCrossTriangle(left_triangle, left_triangle_angle_indice);
-        double cross_right_norm = cross_right.norm();
-        double cross_left_norm = cross_left.norm();
-        double dot_right = getDotTriangle(right_triangle, right_triangle_angle_indice);
-        double dot_left = getDotTriangle(left_triangle, left_triangle_angle_indice);
+            for (int k = 0; k<3; ++k) {
+                if (circu.vertex_indice == left_triangle->point_indices[k]) {
+                    left_triangle_angle_indice = (k+2)%3;
+                }
+            }
 
-        double cotan_right = dot_right/cross_right_norm;
-        double cotan_left = dot_left/cross_left_norm;
+            Point cross_right = getCrossTriangle(right_triangle, right_triangle_angle_indice);
+            Point cross_left = getCrossTriangle(left_triangle, left_triangle_angle_indice);
+            double cross_right_norm = cross_right.norm();
+            double cross_left_norm = cross_left.norm();
+            double dot_right = getDotTriangle(right_triangle, right_triangle_angle_indice);
+            double dot_left = getDotTriangle(left_triangle, left_triangle_angle_indice);
+
+            cotan_right = dot_right/cross_right_norm;
+            cotan_left = dot_left/cross_left_norm;
+            aera += cross_right_norm;
+        }
         Point* rotating_point = getPoint(circu.vertex_indice);
         Point* center_point = getPoint(i);
-
-        aera += cross_right_norm;
         laplacian_x += (cotan_left+cotan_right)*(rotating_point->_x-center_point->_x);
         laplacian_y += (cotan_left+cotan_right)*(rotating_point->_y-center_point->_y);
         laplacian_z += (cotan_left+cotan_right)*(rotating_point->_z-center_point->_z);
-
         ++circu;
     } while (circu.vertex_indice != starting_vertex);
 
@@ -411,39 +527,112 @@ void Mesh::computeLaplacians() {
 
 };
 
+void Mesh::eraseFace(int i) {
+    triangles.erase(triangles.begin()+i);
+    for (Triangle& triangle : triangles) {
+        for (int k = 0; k < 3; ++k) {
+            if (triangle.adj_triangle[k] >= i) {--triangle.adj_triangle[k];}
+        }
+    }
+}
+
 void Mesh::triangleSplit(Point& middlePoint, int i) {
-    Triangle* triangleSplitted = getTriangle(i);
-    Triangle triangleSplitted_real = *triangleSplitted;
+    Triangle triangleSplitted = *getTriangle(i);
     int nb_vertices = verticesSize();
     int nb_triangles = faceSize();
     points.push_back(middlePoint);
     for (int k =0; k<3; ++k) {
         triangles.push_back(
             Triangle(
-                triangleSplitted_real.point_indices[k%3],
-                triangleSplitted_real.point_indices[(k+1)%3],
+                triangleSplitted.point_indices[k%3],
+                triangleSplitted.point_indices[(k+1)%3],
                 nb_vertices,
                 nb_triangles+(k+1)%3,
                 nb_triangles+(k+2)%3,
-                triangleSplitted_real.adj_triangle[(k+2)%3]
+                triangleSplitted.adj_triangle[(k+2)%3]
             )
         );
     }
     for (int k = 0; k < 3; ++k) {
-        Triangle* neighbour = getTriangle(triangleSplitted_real.adj_triangle[k]);
-        if (i == neighbour->adj_triangle[0]) {
-            neighbour->adj_triangle[0] = nb_triangles+(k+1)%3;
-        } else if (i == neighbour->adj_triangle[1]) {
-            neighbour->adj_triangle[1] = nb_triangles+(k+1)%3;
-        } else {
-            neighbour->adj_triangle[2] = nb_triangles+(k+1)%3;
+        if (triangleSplitted.adj_triangle[k] != -1) {
+            Triangle* neighbour = getTriangle(triangleSplitted.adj_triangle[k]);
+            for (int l = 0;  l<3; ++l) {
+                if (i == neighbour->adj_triangle[l]) {
+                    neighbour->adj_triangle[0] = nb_triangles+(k+1)%3;
+                }
+            }
         }
     }
-    triangles.erase(triangles.begin()+i);
-    for (Triangle& triangle : triangles) {
-        for (int k = 0; k < 3; ++k) {
-            if (triangle.adj_triangle[k] >= i) {--triangle.adj_triangle[k];}
+    eraseFace(i);
+};
+
+int find(std::vector<int> liste, int a) {
+    for (int k = 0; k<(int)liste.size(); ++k ) {
+        if (liste[k] == a) {return k;}
+    }
+    return -1;
+};
+
+void Mesh::edgeFlip(int i, int j) {
+    Triangle triangle1 = *getTriangle(i);
+    Triangle triangle2 = *getTriangle(j);
+    int indice1 = -1;
+    int indice2 = -1;
+    for (int k = 0; k<3; ++k) {
+        int indice_find1 = find(triangle2.point_indices,triangle1.point_indices[k]);
+        if (indice_find1 != -1) {
+            for (int l = k+1; l<3; ++l) {
+                int indice_find2 = find(triangle2.point_indices, triangle1.point_indices[l]);
+                if (indice_find2 != 1) {
+                    indice1 = (2*(k+l))%3;
+                    indice2 = (2*(indice_find1+indice_find2))%3;
+                }
+            }
         }
+    }
+    int nb_triangles = faceSize();
+    if (indice1 != -1) {
+        triangles.push_back(
+            Triangle(
+                triangle1.point_indices[indice1],
+                triangle1.point_indices[(indice1+1)%3],
+                triangle2.point_indices[indice2],
+                triangle2.adj_triangle[(indice2+1)%3],
+                nb_triangles+1,
+                triangle1.adj_triangle[(indice1+2)%3]
+            )
+        );
+        triangles.push_back(
+            Triangle(
+                triangle2.point_indices[indice2],
+                triangle2.point_indices[(indice2+1)%3],
+                triangle1.point_indices[indice1],
+                triangle1.adj_triangle[(indice1+1)%3],
+                nb_triangles,
+                triangle2.adj_triangle[(indice2+2)%3]
+            )
+        );
+    }
+    for (int k = 1; k<3; ++k) {
+        if (triangle1.adj_triangle[(indice1+k)%3] != -1) {
+            Triangle tr1 = *getTriangle(triangle1.adj_triangle[(indice1+k)%3]);
+            for (int l = 0; k<3; ++k) {
+                if (tr1.adj_triangle[l] == i) {tr1.adj_triangle[l] = nb_triangles+(k%2);}
+            }
+        }
+        if (triangle2.adj_triangle[(indice2+k)%3] -= -1) {
+            Triangle tr2 = *getTriangle(triangle2.adj_triangle[(indice2+k)%3]);
+            for (int l = 0; k<3; ++k) {
+                if (tr2.adj_triangle[l] == j) {tr2.adj_triangle[l] = nb_triangles+((k+1)%2);}
+            }
+        }
+    }
+    if (i<j) {
+        eraseFace(j);
+        eraseFace(i);
+    } else {
+        eraseFace(i);
+        eraseFace(j);
     }
 };
 

@@ -69,7 +69,9 @@ public:
     Point computeLaplacian(int i);
     void computeLaplacians();
 
+    void eraseFace(int i);
     void triangleSplit(Point& middlePoint, int i);
+    void edgeFlip(int i, int j);
 };
 
 class Iterator_on_faces {
@@ -99,18 +101,27 @@ public:
     Mesh* related_mesh;
     Circulator_on_faces(Mesh* mesh, int related_vertex_indice);
     void operator++();
+    void operator--();
     Triangle* operator*();
+
+    Circulator_on_faces previous();
+    Circulator_on_faces next();
 };
 
 class Circulator_on_vertices {
 public:
     int vertex_indice;
-    int face_indice;
+    int right_face_indice;
+    int left_face_indice;
     Mesh* related_mesh;
     int related_vertex_indice;
     Circulator_on_vertices(Mesh* mesh, int related_vertex_indice);
     void operator++();
+    void operator--();
     Point* operator*();
+
+    Circulator_on_vertices previous();
+    Circulator_on_vertices next();
 };
 
 class GeometricWorld //Here used to create a singleton instance
