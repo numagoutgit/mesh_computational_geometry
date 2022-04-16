@@ -615,15 +615,15 @@ void Mesh::edgeFlip(int i, int j) {
     }
     for (int k = 1; k<3; ++k) {
         if (triangle1.adj_triangle[(indice1+k)%3] != -1) {
-            Triangle tr1 = *getTriangle(triangle1.adj_triangle[(indice1+k)%3]);
-            for (int l = 0; k<3; ++k) {
-                if (tr1.adj_triangle[l] == i) {tr1.adj_triangle[l] = nb_triangles+(k%2);}
+            Triangle* tr1 = getTriangle(triangle1.adj_triangle[(indice1+k)%3]);
+            for (int l = 0; l<3; ++l) {
+                if (tr1->adj_triangle[l] == i) {tr1->adj_triangle[l] = nb_triangles+(k%2);}
             }
         }
-        if (triangle2.adj_triangle[(indice2+k)%3] -= -1) {
-            Triangle tr2 = *getTriangle(triangle2.adj_triangle[(indice2+k)%3]);
-            for (int l = 0; k<3; ++k) {
-                if (tr2.adj_triangle[l] == j) {tr2.adj_triangle[l] = nb_triangles+((k+1)%2);}
+        if (triangle2.adj_triangle[(indice2+k)%3] != -1) {
+            Triangle* tr2 = getTriangle(triangle2.adj_triangle[(indice2+k)%3]);
+            for (int l = 0; l<3; ++l) {
+                if (tr2->adj_triangle[l] == j) {tr2->adj_triangle[l] = nb_triangles+((k+1)%2);}
             }
         }
     }
