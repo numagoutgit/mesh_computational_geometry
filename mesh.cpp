@@ -61,6 +61,12 @@ Point cross(const Point& A, const Point& B) {
                 );
 };
 
+int orientation(const Point& A, const Point& B, const Point& C) {
+    Point cross_product = cross(B-A, C-A);
+    return dot(cross_product, Point(0,0,1));
+
+};
+
 // Draw a Point
 void glPointDraw(const Point & p) {
     glVertex3f(p._x, p._y, p._z);

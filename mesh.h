@@ -27,6 +27,7 @@ Point operator*(const double b, const Point& A);
 Point operator/(const Point& A, const double b);
 double dot(const Point& A, const Point& B);
 Point cross(const Point& A, const Point& B);
+int orientation(const Point& A, const Point& B, const Point& C);
 
 
 //** TP : TO MODIFY
