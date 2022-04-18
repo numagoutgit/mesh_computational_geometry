@@ -61,10 +61,24 @@ Point cross(const Point& A, const Point& B) {
                 );
 };
 
-int orientation(const Point& A, const Point& B, const Point& C) {
+double orientation(const Point& A, const Point& B, const Point& C) {
     Point cross_product = cross(B-A, C-A);
     return dot(cross_product, Point(0,0,1));
+};
 
+int Mesh::inTriangle(int ti, const Point &D) {
+    Triangle triangle_on = *getTriangle(ti);
+    std::vector<double> orientations;
+    for (int k = 0; k<3; ++k) {
+        orientations[k] = orientation(*getPoint(triangle_on.point_indices[k]), *getPoint(triangle_on.point_indices[(k+1)%3]), D);
+    }
+    if (orientations[0] > 0 && orientations[1] > 0 && orientations[2] > 0) {
+        return 1;
+    } else if (orientations[0] == 0 || orientations[1] == 0 || orientations[2] == 0) {
+        return 0;
+    } else {
+        return -1;
+    }
 };
 
 // Draw a Point

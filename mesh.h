@@ -27,7 +27,7 @@ Point operator*(const double b, const Point& A);
 Point operator/(const Point& A, const double b);
 double dot(const Point& A, const Point& B);
 Point cross(const Point& A, const Point& B);
-int orientation(const Point& A, const Point& B, const Point& C);
+double orientation(const Point& A, const Point& B, const Point& C);
 
 
 //** TP : TO MODIFY
@@ -73,6 +73,8 @@ public:
     void eraseFace(int i);
     void triangleSplit(Point& middlePoint, int i);
     void edgeFlip(int i, int j);
+
+    int inTriangle(int ti, const Point& D);
 };
 
 class Iterator_on_faces {
