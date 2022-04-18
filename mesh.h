@@ -28,6 +28,7 @@ Point operator/(const Point& A, const double b);
 double dot(const Point& A, const Point& B);
 Point cross(const Point& A, const Point& B);
 double orientation(const Point& A, const Point& B, const Point& C);
+bool intersectSegments(const Point& A, const Point& B, const Point& C, const Point& D);
 
 
 //** TP : TO MODIFY
@@ -75,6 +76,7 @@ public:
     void edgeFlip(int i, int j);
 
     int inTriangle(int ti, const Point& D);
+    int findTriangle(const Point& M);
 };
 
 class Iterator_on_faces {

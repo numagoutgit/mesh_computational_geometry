@@ -66,6 +66,16 @@ double orientation(const Point& A, const Point& B, const Point& C) {
     return dot(cross_product, Point(0,0,1));
 };
 
+bool intersectSegments(const Point& A, const Point& B, const Point& C, const Point& D) {
+    Point u = B-A;
+    Point v = D-C;
+    double det = u._x*v._y - u._y*v._x;
+    if (det == 0) {return false;}
+    double t1 = -1/det * ((C._y - A._y)*v._x - (C._x - A._x)*v._y);
+    double t2 = -1/det * ((C._y - A._y)*u._x - (C._x - A._x)*u._y);
+    return (t1 >= 0 && t1 <= 1 && t2 >= 0 && t2 <= 1);
+};
+
 int Mesh::inTriangle(int ti, const Point &D) {
     Triangle triangle_on = *getTriangle(ti);
     std::vector<double> orientations;
@@ -611,28 +621,27 @@ void Mesh::edgeFlip(int i, int j) {
         }
     }
     int nb_triangles = faceSize();
-    if (indice1 != -1) {
-        triangles.push_back(
-            Triangle(
-                triangle1.point_indices[indice1],
-                triangle1.point_indices[(indice1+1)%3],
-                triangle2.point_indices[indice2],
-                triangle2.adj_triangle[(indice2+1)%3],
-                nb_triangles+1,
-                triangle1.adj_triangle[(indice1+2)%3]
-            )
-        );
-        triangles.push_back(
-            Triangle(
-                triangle2.point_indices[indice2],
-                triangle2.point_indices[(indice2+1)%3],
-                triangle1.point_indices[indice1],
-                triangle1.adj_triangle[(indice1+1)%3],
-                nb_triangles,
-                triangle2.adj_triangle[(indice2+2)%3]
-            )
-        );
-    }
+    if (indice1 == -1) {return;}
+    triangles.push_back(
+        Triangle(
+            triangle1.point_indices[indice1],
+            triangle1.point_indices[(indice1+1)%3],
+            triangle2.point_indices[indice2],
+            triangle2.adj_triangle[(indice2+1)%3],
+            nb_triangles+1,
+            triangle1.adj_triangle[(indice1+2)%3]
+        )
+    );
+    triangles.push_back(
+        Triangle(
+            triangle2.point_indices[indice2],
+            triangle2.point_indices[(indice2+1)%3],
+            triangle1.point_indices[indice1],
+            triangle1.adj_triangle[(indice1+1)%3],
+            nb_triangles,
+            triangle2.adj_triangle[(indice2+2)%3]
+        )
+    );
     for (int k = 1; k<3; ++k) {
         if (triangle1.adj_triangle[(indice1+k)%3] != -1) {
             Triangle* tr1 = getTriangle(triangle1.adj_triangle[(indice1+k)%3]);
@@ -654,6 +663,13 @@ void Mesh::edgeFlip(int i, int j) {
         eraseFace(i);
         eraseFace(j);
     }
+};
+
+int Mesh::findTriangle(const Point &M) {
+    for (Iterator_on_faces it = Iterator_on_faces(this); !it.face_end(); ++it) {
+        if (inTriangle(it.face_indice, M) >= 0) {return it.face_indice;}
+    }
+    return -1;
 };
 
 // DRAWING FEATURES

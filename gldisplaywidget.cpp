@@ -32,11 +32,11 @@ void GLDisplayWidget::initializeGL()
     // It can also be constructed following a signal (button)
     // _mesh.buildTetrahedron(0.5,0.6,0.8);
     // _mesh.buildPyramid(0.5,0.6,0.8);
-    _mesh.buildInput("../meshes/queen.off", 5,5,5);
+    // _mesh.buildInput("../meshes/queen.off", 5,5,5);
     // _mesh.buildInput("../meshes/cube.off", 0.5,0.6,0.8);
     // _mesh.buildInput("../meshes/tetrahedre.off", 0.5,0.6,0.8);
     // _mesh.buildInput("../meshes/plan.off", 1,1,1);
-    // _mesh.buildInput("../meshes/equilateral.off", 0.7,0.7,0.7);
+    _mesh.buildInput("../meshes/equilateral.off", 0.7,0.7,0.7);
 
 
     // TEST ITERATOR
@@ -56,9 +56,8 @@ void GLDisplayWidget::initializeGL()
 
     // Point middle = Point(0,1,0);
     // _mesh.triangleSplit(middle,1);
-    // _mesh.edgeFlip(0,1);
-    _mesh.computeLaplacians();
-    // qDebug() << _mesh.laplacian;
+    _mesh.edgeFlip(0,1);
+    // _mesh.computeLaplacians();
 }
 
 void GLDisplayWidget::paintGL(){
